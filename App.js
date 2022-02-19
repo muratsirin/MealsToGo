@@ -1,19 +1,29 @@
 import React from "react";
+import { initializeApp } from "firebase/app";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 import { ThemeProvider } from "styled-components";
-import { RestaurantsScreen } from "./src/features/restaurants/screens/restaurants.screen";
 import { theme } from "./src/infrastructure/theme";
 import {
   useFonts as useOswald,
   Oswald_400Regular,
 } from "@expo-google-fonts/oswald";
 import { useFonts as useLato, Lato_400Regular } from "@expo-google-fonts/lato";
-import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { SafeArea } from "./src/components/utility/safe-area.component";
-import { Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { RestaurantsContextProvider } from "./src/services/restaurants/restaurants.context";
+import { LocationContextProvider } from "./src/services/location/location.context";
+import { Navigation } from "./src/infrastructure/navigation/index";
+import { FavouritesContextProvider } from "./src/services/favourites/favourites.context";
+import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCNTprlPI-frSMDL8YEJW4HBFRjd2Xqb7s",
+  authDomain: "mealstogo-e7432.firebaseapp.com",
+  projectId: "mealstogo-e7432",
+  storageBucket: "mealstogo-e7432.appspot.com",
+  messagingSenderId: "416561647070",
+  appId: "1:416561647070:web:5d0e5aef53676f8375614f",
+};
+
+initializeApp(firebaseConfig);
 
 export default function App() {
   const [oswalOverloaded] = useOswald({
@@ -27,51 +37,18 @@ export default function App() {
     return null;
   }
 
-  const TAB_ICON = {
-    Restaurants: "md-restaurant",
-    Map: "md-map",
-    Settings: "md-settings",
-  };
-
-  const screenOptions = ({ route }) => {
-    const iconName = TAB_ICON[route.name];
-
-    return {
-      tabBarIcon: ({ size, color }) => (
-        <Ionicons name={iconName} size={size} color={color} />
-      ),
-      headerShown: false,
-      tabBarActiveTintColor: "tomato",
-      tabBarInactiveTintColor: "gray",
-    };
-  };
-
-  const Tab = createBottomTabNavigator();
-
-  const Settings = () => (
-    <SafeArea>
-      <Text>Settings</Text>
-    </SafeArea>
-  );
-
-  const Map = () => (
-    <SafeArea>
-      <Text>Map</Text>
-    </SafeArea>
-  );
-
   return (
     <>
       <ThemeProvider theme={theme}>
-        <RestaurantsContextProvider>
-          <NavigationContainer>
-            <Tab.Navigator screenOptions={screenOptions}>
-              <Tab.Screen name="Restaurants" component={RestaurantsScreen} />
-              <Tab.Screen name="Map" component={Map} />
-              <Tab.Screen name="Settings" component={Settings} />
-            </Tab.Navigator>
-          </NavigationContainer>
-        </RestaurantsContextProvider>
+        <AuthenticationContextProvider>
+          <FavouritesContextProvider>
+            <LocationContextProvider>
+              <RestaurantsContextProvider>
+                <Navigation />
+              </RestaurantsContextProvider>
+            </LocationContextProvider>
+          </FavouritesContextProvider>
+        </AuthenticationContextProvider>
       </ThemeProvider>
       <ExpoStatusBar style="auto" />
     </>
